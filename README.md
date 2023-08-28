@@ -1,3 +1,7 @@
+
+![Screenshot (906)](https://github.com/a2rp/manufac-typescript-react-winedata-stats/assets/5670738/b095c9d3-f47c-4f6d-805c-177a8b9dc7d8)
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
