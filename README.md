@@ -1,11 +1,12 @@
 
 <img width="958" alt="Screenshot 2023-08-28 185832" src="https://github.com/a2rp/manufac-typescript-react-winedata-stats/assets/5670738/3b7b0651-1705-40b1-8d32-a046ce5e56ee">
-Evaluation criteria:
-1. done - Calculated values are correct, and the functions are time efficient. Weight: 70%
-2. done - Clean code, modularity, folder structure, quality of comments (to explain code wherever
+
+# Evaluation criteria:
+# done - Calculated values are correct, and the functions are time efficient. Weight: 70%
+# done - Clean code, modularity, folder structure, quality of comments (to explain code wherever
 needed). Weight: 25%
-3. done - README should include the full screenshot of both the tables. Weight: 5%
-4. done - Bonus for using TypeScript. Weight: 15%
+# done - README should include the full screenshot of both the tables. Weight: 5%
+# done - Bonus for using TypeScript. Weight: 15%
 
 
 # Getting Started with Create React App
