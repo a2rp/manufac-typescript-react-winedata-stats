@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/manufac-typescript-react-winedata-stats/static/css/main.a3c2b831.css",
-    "main.js": "/manufac-typescript-react-winedata-stats/static/js/main.6b1c2e88.js",
+    "main.js": "/manufac-typescript-react-winedata-stats/static/js/main.7a44fb51.js",
     "static/js/787.e14f62ce.chunk.js": "/manufac-typescript-react-winedata-stats/static/js/787.e14f62ce.chunk.js",
     "index.html": "/manufac-typescript-react-winedata-stats/index.html",
     "main.a3c2b831.css.map": "/manufac-typescript-react-winedata-stats/static/css/main.a3c2b831.css.map",
-    "main.6b1c2e88.js.map": "/manufac-typescript-react-winedata-stats/static/js/main.6b1c2e88.js.map",
+    "main.7a44fb51.js.map": "/manufac-typescript-react-winedata-stats/static/js/main.7a44fb51.js.map",
     "787.e14f62ce.chunk.js.map": "/manufac-typescript-react-winedata-stats/static/js/787.e14f62ce.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.a3c2b831.css",
-    "static/js/main.6b1c2e88.js"
+    "static/js/main.7a44fb51.js"
   ]
 }
