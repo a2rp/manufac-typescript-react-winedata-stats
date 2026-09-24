@@ -1,186 +1,237 @@
-// import "./App.css";
+import { useEffect, useMemo, useState } from "react";
+import {
+  FaChartBar,
+  FaCode,
+  FaDatabase,
+  FaGithub,
+} from "react-icons/fa";
+import { FiArrowUp, FiBookOpen, FiExternalLink, FiMenu, FiX } from "react-icons/fi";
 import styles from "./styles.module.scss";
 import { wineDataSet } from "./files/wineDataSet";
-import { useEffect, useState } from "react";
-import Mean from "./components/mean";
-import Median from "./components/median";
-import Mode from "./components/mode";
+
+type WineRow = (typeof wineDataSet)[number];
+
+type MeasureValues = {
+  mean: string;
+  median: string;
+  mode: string;
+};
+
+type WineStats = {
+  alcoholClass: number;
+  sampleCount: number;
+  flavanoids: MeasureValues;
+  gamma: MeasureValues;
+};
+
+const mean = (values: number[]): number =>
+  values.reduce((total, value) => total + value, 0) / values.length;
+
+const median = (values: number[]): number => {
+  const sortedValues = [...values].sort((first, second) => first - second);
+  const middle = Math.floor(sortedValues.length / 2);
+
+  return sortedValues.length % 2 === 0
+    ? (sortedValues[middle - 1] + sortedValues[middle]) / 2
+    : sortedValues[middle];
+};
+
+const mode = (values: number[]): number => {
+  const counts = new Map<number, number>();
+  let mostCommon = values[0];
+  let highestCount = 0;
+
+  values.forEach((value) => {
+    const count = (counts.get(value) || 0) + 1;
+    counts.set(value, count);
+
+    if (count > highestCount) {
+      mostCommon = value;
+      highestCount = count;
+    }
+  });
+
+  return mostCommon;
+};
+
+const formatMeasure = (values: number[]): MeasureValues => ({
+  mean: mean(values).toFixed(3),
+  median: median(values).toFixed(3),
+  mode: mode(values).toFixed(3),
+});
+
+const getStatistics = (): WineStats[] => {
+  const groupedRows = new Map<number, WineRow[]>();
+
+  wineDataSet.forEach((row) => {
+    const rows = groupedRows.get(row.Alcohol) || [];
+    rows.push(row);
+    groupedRows.set(row.Alcohol, rows);
+  });
+
+  return Array.from(groupedRows.entries())
+    .sort(([firstClass], [secondClass]) => firstClass - secondClass)
+    .map(([alcoholClass, rows]) => {
+      const flavanoids = rows.map((row) => Number(row.Flavanoids));
+      const gamma = rows.map(
+        (row) => (Number(row.Ash) * Number(row.Hue)) / Number(row.Magnesium)
+      );
+
+      return {
+        alcoholClass,
+        sampleCount: rows.length,
+        flavanoids: formatMeasure(flavanoids),
+        gamma: formatMeasure(gamma),
+      };
+    });
+};
+
+const measures = ["mean", "median", "mode"] as const;
 
 function App() {
-    const [class1Array, setClass1Array] = useState([]);
-    const [class2Array, setClass2Array] = useState([]);
-    const [class3Array, setClass3Array] = useState([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showTopButton, setShowTopButton] = useState(false);
+  const statistics = useMemo(getStatistics, []);
 
-    const [gamma1Array, setGamma1Array] = useState(Array());
-    const [gamma2Array, setGamma2Array] = useState([]);
-    const [gamma3Array, setGamma3Array] = useState([]);
+  useEffect(() => {
+    const handleScroll = () => setShowTopButton(window.scrollY > 300);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-    useEffect(() => {
-        const class1: any = []; // alcholo = 1
-        const class2: any = []; // alcholo = 2
-        const class3: any = []; // alcholo = 3
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
-        const gamma1: any = []; // alcholo = 1
-        const gamma2: any = []; // alcholo = 2
-        const gamma3: any = []; // alcholo = 3
+  return (
+    <div className={styles.appShell}>
+      <header className={styles.header}>
+        <a className={styles.brand} href="#top" onClick={closeMobileMenu} aria-label="Wine data statistics home">
+          <img src={process.env.PUBLIC_URL + "/logo.png"} alt="Ashish Ranjan logo" />
+          <span>
+            <small>TypeScript data view</small>
+            <strong>Wine Statistics</strong>
+          </span>
+        </a>
 
-        wineDataSet.map((item) => {
-            if (item["Alcohol"] === 1) {
-                class1.push(item);
-                gamma1.push(
-                    (Number(item["Ash"]) * Number(item["Hue"])) /
-                        item["Magnesium"]
-                );
-            } else if (item["Alcohol"] === 2) {
-                class2.push(item);
-                gamma2.push(
-                    (Number(item["Ash"]) * Number(item["Hue"])) /
-                        item["Magnesium"]
-                );
-            } else if (item["Alcohol"] === 3) {
-                class3.push(item);
-                gamma3.push(
-                    (Number(item["Ash"]) * Number(item["Hue"])) /
-                        item["Magnesium"]
-                );
-            }
-        });
+        <button
+          className={styles.menuButton}
+          type="button"
+          onClick={() => setMobileMenuOpen((open) => !open)}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="main-navigation"
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+        >
+          {mobileMenuOpen ? <FiX aria-hidden="true" /> : <FiMenu aria-hidden="true" />}
+        </button>
 
-        setGamma1Array(gamma1);
-        setGamma2Array(gamma2);
-        setGamma3Array(gamma3);
+        <nav id="main-navigation" className={styles.navigation + (mobileMenuOpen ? " " + styles.navigationOpen : "")} aria-label="Main navigation">
+          <a href="#statistics" onClick={closeMobileMenu}><FaChartBar aria-hidden="true" /> Statistics</a>
+          <a href="#method" onClick={closeMobileMenu}><FiBookOpen aria-hidden="true" /> Method</a>
+          <a href="https://github.com/a2rp/manufac-typescript-react-winedata-stats" target="_blank" rel="noopener noreferrer" onClick={closeMobileMenu}><FaGithub aria-hidden="true" /> Source</a>
+        </nav>
+      </header>
 
-        const tempClass1Array: any = [];
-        Object.entries(class1).forEach(([key, value], index) => {
-            tempClass1Array.push(parseFloat(class1[key]["Flavanoids"]));
-        });
-        setClass1Array(tempClass1Array);
+      <main id="top">
+        <section className={styles.hero}>
+          <div className={styles.heroCopy}>
+            <p className={styles.eyebrow}>TypeScript data view</p>
+            <h1>Wine data, made easier to compare.</h1>
+            <p className={styles.intro}>
+              Explore grouped flavanoids and gamma statistics across the wine dataset.
+              The calculations stay typed and the results stay easy to scan.
+            </p>
+            <div className={styles.heroActions}>
+              <a className={styles.primaryAction} href="#statistics"><FaChartBar aria-hidden="true" /> View statistics</a>
+              <a className={styles.secondaryAction} href="#method"><FiExternalLink aria-hidden="true" /> See the method</a>
+            </div>
+          </div>
+          <div className={styles.heroVisual}>
+            <img src={process.env.PUBLIC_URL + "/preview.png"} alt="Wine statistics dashboard preview" />
+            <div className={styles.visualBadge}><FaDatabase aria-hidden="true" /> Typed local dataset</div>
+          </div>
+        </section>
 
-        const tempClass2Array: any = [];
-        Object.entries(class2).forEach(([key, value], index) => {
-            tempClass2Array.push(parseFloat(class2[key]["Flavanoids"]));
-        });
-        setClass2Array(tempClass2Array);
+        <section className={styles.summaryGrid} aria-label="Dataset summary">
+          <article><FaDatabase aria-hidden="true" /><strong>{wineDataSet.length}</strong><span>Wine records</span></article>
+          <article><FaChartBar aria-hidden="true" /><strong>{statistics.length}</strong><span>Alcohol classes</span></article>
+          <article><FaCode aria-hidden="true" /><strong>6</strong><span>Measures shown</span></article>
+        </section>
 
-        const tempClass3Array: any = [];
-        Object.entries(class3).forEach(([key, value], index) => {
-            tempClass3Array.push(parseFloat(class3[key]["Flavanoids"]));
-        });
-        setClass3Array(tempClass3Array);
-    }, []);
+        <section id="statistics" className={styles.statisticsSection} aria-labelledby="statistics-title">
+          <div className={styles.sectionHeading}>
+            <div>
+              <p className={styles.eyebrow}>Results</p>
+              <h2 id="statistics-title">Grouped statistical measures</h2>
+            </div>
+            <p>Each column represents one alcohol class in the source dataset.</p>
+          </div>
 
-    useEffect(() => {
-        // console.log(class1Array, class2Array, class3Array);
-    }, [class1Array, class2Array, class3Array]);
-
-    useEffect(() => {
-        // console.log(gamma1Array, gamma2Array, gamma3Array);
-    }, [gamma1Array, gamma2Array, gamma3Array]);
-
-    // gamma calculation
-
-    return (
-        <div className={styles.container}>
-            <h1>Some Statistical Measures Of The Wine Data Set</h1>
-            <table>
-                <thead>
-                    <tr>
+          <div className={styles.tableGrid}>
+            {(["flavanoids", "gamma"] as const).map((measureName) => (
+              <article className={styles.tableCard} key={measureName}>
+                <div className={styles.tableTitle}>
+                  {measureName === "flavanoids" ? <FaChartBar aria-hidden="true" /> : <FaDatabase aria-hidden="true" />}
+                  <h3>{measureName[0].toUpperCase() + measureName.slice(1)}</h3>
+                </div>
+                <div className={styles.tableScroll}>
+                  <table>
+                    <thead>
+                      <tr>
                         <th>Measure</th>
-                        <th>Alcohol - Class 1</th>
-                        <th>Alcohol - Class 2</th>
-                        <th>Alcohol - Class 3</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Flavanoids Mean</td>
-                        <td>
-                            <Mean key={class1Array} theArray={class1Array} />
-                        </td>
-                        <td>
-                            <Mean key={class2Array} theArray={class2Array} />
-                        </td>
-                        <td>
-                            <Mean key={class3Array} theArray={class3Array} />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Flavanoids Median</td>
-                        <td>
-                            <Median key={class1Array} theArray={class1Array} />
-                        </td>
-                        <td>
-                            <Median key={class2Array} theArray={class2Array} />
-                        </td>
-                        <td>
-                            <Median key={class3Array} theArray={class3Array} />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Flavanoids Mode</td>
-                        <td>
-                            <Mode key={class1Array} theArray={class1Array} />
-                        </td>
-                        <td>
-                            <Mode key={class2Array} theArray={class2Array} />
-                        </td>
-                        <td>
-                            <Mode key={class3Array} theArray={class3Array} />
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                        {statistics.map(({ alcoholClass }) => <th key={alcoholClass}>Class {alcoholClass}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {measures.map((measure) => (
+                        <tr key={measure}>
+                          <th scope="row">{measure[0].toUpperCase() + measure.slice(1)}</th>
+                          {statistics.map((item) => <td key={item.alcoholClass}>{item[measureName][measure]}</td>)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Measure</th>
-                        <th>Alcohol - Class 1</th>
-                        <th>Alcohol - Class 2</th>
-                        <th>Alcohol - Class 3</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Gamma Mean</td>
-                        <td>
-                            <Mean key={gamma1Array} theArray={gamma1Array} />
-                        </td>
-                        <td>
-                            <Mean key={gamma2Array} theArray={gamma2Array} />
-                        </td>
-                        <td>
-                            <Mean key={gamma3Array} theArray={gamma3Array} />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Gamma Median</td>
-                        <td>
-                            <Median key={gamma1Array} theArray={gamma1Array} />
-                        </td>
-                        <td>
-                            <Median key={gamma2Array} theArray={gamma2Array} />
-                        </td>
-                        <td>
-                            <Median key={gamma3Array} theArray={gamma3Array} />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Gamma Mode</td>
-                        <td>
-                            <Mode key={gamma1Array} theArray={gamma1Array} />
-                        </td>
-                        <td>
-                            <Mode key={gamma2Array} theArray={gamma2Array} />
-                        </td>
-                        <td>
-                            <Mode key={gamma3Array} theArray={gamma3Array} />
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <section id="method" className={styles.methodSection} aria-labelledby="method-title">
+          <div>
+            <p className={styles.eyebrow}>How it is calculated</p>
+            <h2 id="method-title">One dataset, two useful views.</h2>
+          </div>
+          <div className={styles.methodCards}>
+            <article><span>01</span><h3>Group by alcohol</h3><p>Rows are grouped using the Alcohol field before any summary is calculated.</p></article>
+            <article><span>02</span><h3>Summarize values</h3><p>Mean, median and mode are calculated for Flavanoids and the derived Gamma value.</p></article>
+            <article><span>03</span><h3>Compare classes</h3><p>The result is rendered as responsive tables so each class is easy to compare.</p></article>
+          </div>
+        </section>
+      </main>
+
+      <footer className={styles.footer}>
+        <div className={styles.footerTop}>
+          <div>
+            <p className={styles.eyebrow}>Built for learning</p>
+            <p className={styles.footerText}>A practical TypeScript view for exploring small datasets.</p>
+          </div>
+          <nav className={styles.socialLinks} aria-label="Project links">
+            <a href="https://github.com/a2rp/manufac-typescript-react-winedata-stats" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><FaGithub aria-hidden="true" /><span className={styles.srOnly}>GitHub</span></a>
+            <a href="https://www.ashishranjan.net/" target="_blank" rel="noopener noreferrer" aria-label="Portfolio" title="Portfolio"><FaCode aria-hidden="true" /><span className={styles.srOnly}>Portfolio</span></a>
+          </nav>
         </div>
-    );
+        <div className={styles.footerBottom}>
+          Copyright © {new Date().getFullYear()}{" "}
+          <a href="https://www.ashishranjan.net" target="_blank" rel="noopener noreferrer">Ashish Ranjan</a>
+        </div>
+      </footer>
+
+      <button className={styles.topButton + " " + (showTopButton ? styles.topButtonVisible : "")} type="button" onClick={scrollToTop} aria-label="Go to top">
+        <FiArrowUp aria-hidden="true" />
+      </button>
+    </div>
+  );
 }
 
 export default App;

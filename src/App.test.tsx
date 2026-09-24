@@ -1,9 +1,9 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import App from './App';
+import { render, screen } from "@testing-library/react";
+import App from "./App";
 
-test('renders learn react link', () => {
+test("renders the TypeScript wine statistics dashboard", () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  expect(screen.getByText("Wine data, made easier to compare.")).toBeInTheDocument();
+  expect(screen.getByText("Flavanoids")).toBeInTheDocument();
+  expect(screen.getByText("Gamma")).toBeInTheDocument();
 });
