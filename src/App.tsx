@@ -39,7 +39,7 @@ type MeasureValues = {
 };
 
 type WineStats = {
-  alcoholClass: number;
+  wineClass: number;
   sampleCount: number;
   flavanoids: MeasureValues;
   gamma: MeasureValues;
@@ -85,21 +85,21 @@ const getStatistics = (): WineStats[] => {
   const groupedRows = new Map<number, WineRow[]>();
 
   wineDataSet.forEach((row) => {
-    const rows = groupedRows.get(row.Alcohol) || [];
+    const rows = groupedRows.get(row.Class) || [];
     rows.push(row);
-    groupedRows.set(row.Alcohol, rows);
+    groupedRows.set(row.Class, rows);
   });
 
   return Array.from(groupedRows.entries())
     .sort(([firstClass], [secondClass]) => firstClass - secondClass)
-    .map(([alcoholClass, rows]) => {
+    .map(([wineClass, rows]) => {
       const flavanoids = rows.map((row) => Number(row.Flavanoids));
       const gamma = rows.map(
         (row) => (Number(row.Ash) * Number(row.Hue)) / Number(row.Magnesium)
       );
 
       return {
-        alcoholClass,
+        wineClass,
         sampleCount: rows.length,
         flavanoids: formatMeasure(flavanoids),
         gamma: formatMeasure(gamma),
@@ -175,7 +175,7 @@ function App() {
 
         <section className={styles.summaryGrid} aria-label="Dataset summary">
           <article><FaDatabase aria-hidden="true" /><strong>{wineDataSet.length}</strong><span>Wine records</span></article>
-          <article><FaChartBar aria-hidden="true" /><strong>{statistics.length}</strong><span>Alcohol classes</span></article>
+          <article><FaChartBar aria-hidden="true" /><strong>{statistics.length}</strong><span>Wine classes</span></article>
           <article><FaCode aria-hidden="true" /><strong>6</strong><span>Measures shown</span></article>
         </section>
 
@@ -185,7 +185,7 @@ function App() {
               <p className={styles.eyebrow}>Results</p>
               <h2 id="statistics-title">Grouped statistical measures</h2>
             </div>
-            <p>Each column represents one alcohol class in the source dataset.</p>
+            <p>Each column represents one wine class in the source dataset.</p>
           </div>
 
           <div className={styles.tableGrid}>
@@ -200,14 +200,14 @@ function App() {
                     <thead>
                       <tr>
                         <th>Measure</th>
-                        {statistics.map(({ alcoholClass }) => <th key={alcoholClass}>Class {alcoholClass}</th>)}
+                        {statistics.map(({ wineClass }) => <th key={wineClass}>Class {wineClass}</th>)}
                       </tr>
                     </thead>
                     <tbody>
                       {measures.map((measure) => (
                         <tr key={measure}>
                           <th scope="row">{measure[0].toUpperCase() + measure.slice(1)}</th>
-                          {statistics.map((item) => <td key={item.alcoholClass}>{item[measureName][measure]}</td>)}
+                          {statistics.map((item) => <td key={item.wineClass}>{item[measureName][measure]}</td>)}
                         </tr>
                       ))}
                     </tbody>
@@ -224,8 +224,8 @@ function App() {
             <h2 id="method-title">One dataset, two useful views.</h2>
           </div>
           <div className={styles.methodCards}>
-            <article><span>01</span><h3>Group by alcohol</h3><p>Rows are grouped using the Alcohol field before any summary is calculated.</p></article>
-            <article><span>02</span><h3>Summarize values</h3><p>Mean, median and mode are calculated for Flavanoids and the derived Gamma value.</p></article>
+            <article><span>01</span><h3>Group by class</h3><p>Rows are grouped by the wine Class label before any summary is calculated.</p></article>
+            <article><span>02</span><h3>Summarize values</h3><p>Gamma is calculated per record as (Ash × Hue) ÷ Magnesium. Mean, median and mode summarize both measures.</p></article>
             <article><span>03</span><h3>Compare classes</h3><p>The result is rendered as responsive tables so each class is easy to compare.</p></article>
           </div>
         </section>

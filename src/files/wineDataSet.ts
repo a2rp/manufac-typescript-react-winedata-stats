@@ -1,4 +1,4 @@
-export const wineDataSet = [
+const sourceWineDataSet = [
     {
         Alcohol: 1,
         "Malic Acid": 14.23,
@@ -2670,3 +2670,21 @@ export const wineDataSet = [
         Unknown: 1.6,
     },
 ];
+
+// The bundled rows place the class in Alcohol and shift feature labels by one.
+// Normalize the values to the Wine recognition dataset's field names before use.
+export const wineDataSet = sourceWineDataSet.map((record) => ({
+  Class: record.Alcohol,
+  Alcohol: record["Malic Acid"],
+  "Malic Acid": record.Ash,
+  Ash: record["Alcalinity of ash"],
+  "Alcalinity of ash": record.Magnesium,
+  Magnesium: record["Total phenols"],
+  "Total phenols": record.Flavanoids,
+  Flavanoids: record["Nonflavanoid phenols"],
+  "Nonflavanoid phenols": record.Proanthocyanins,
+  Proanthocyanins: record["Color intensity"],
+  "Color intensity": record.Hue,
+  Hue: record["OD280/OD315 of diluted wines"],
+  "OD280/OD315 of diluted wines": record.Unknown,
+}));

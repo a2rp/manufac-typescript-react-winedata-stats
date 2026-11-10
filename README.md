@@ -1,13 +1,14 @@
 # TypeScript Wine Data Statistics
 
-A TypeScript React dashboard that groups a wine dataset by alcohol class and compares flavanoids and derived gamma statistics.
+A TypeScript React dashboard that groups wine records by class and compares class-wise Flavanoids and derived Gamma statistics.
 
 ![TypeScript Wine Data Statistics preview](screenshot.png)
 
 ## Features
 
-- Typed grouped wine records by alcohol class
+- Typed wine records grouped by the dataset's class label
 - Mean, median and mode calculations for two measures
+- Gamma is calculated per record as `(Ash × Hue) ÷ Magnesium`
 - Responsive comparison tables with dataset summary cards
 - Fixed responsive header, mobile navigation and go-to-top control
 - Local branding, accessible links and simple border and shadow interactions
@@ -16,9 +17,13 @@ A TypeScript React dashboard that groups a wine dataset by alcohol class and com
 
 React, TypeScript, Create React App, Sass modules and React Icons.
 
+## Data and calculations
+
+The bundled 178 wine records follow the [UCI Wine recognition dataset](https://archive.ics.uci.edu/dataset/109/wine). The data file is normalized to the dataset's field names before calculations; the class label is kept separately from the Alcohol measurement. Proline is omitted because the dashboard does not use it. The tables show the mean, median and mode of Flavanoids and per-record Gamma for each class.
+
 ## Run locally
 
-    npm install
+    npm ci
     npm start
 
 Create a production build with npm run build.
